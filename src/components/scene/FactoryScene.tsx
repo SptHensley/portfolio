@@ -90,17 +90,26 @@ export function FactoryScene() {
       </Environment>
 
       {/* Studio floor: grid lines + shadow catcher on the seamless backdrop */}
+      {/*
+        Floor grid. drei sizes an "infinite" grid as args × (1 + fadeDistance),
+        so args 2.4 gives a ±40 m plane: the distance fade reaches zero well
+        before the edge (no hard horizon line). followCamera keeps the plane
+        under the camera as it pans to the far stations; the lines themselves
+        stay anchored to the world.
+      */}
       <Grid
+        args={[2.4, 2.4]}
         position={[0, 0.001, 0]}
         infiniteGrid
+        followCamera
         cellSize={0.5}
         cellThickness={0.7}
         cellColor="#c4c9d1"
         sectionSize={2.5}
         sectionThickness={1.1}
         sectionColor="#a8afba"
-        fadeDistance={38}
-        fadeStrength={1.4}
+        fadeDistance={32}
+        fadeStrength={1.6}
       />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]} receiveShadow renderOrder={1}>
         <planeGeometry args={[220, 90]} />
