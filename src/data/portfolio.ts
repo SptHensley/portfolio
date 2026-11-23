@@ -106,11 +106,11 @@ export interface PortfolioData {
 
 export const portfolio: PortfolioData = {
   name: "Shane Hensley",
-  callsign: "SH-01",
+  callsign: "SH",
   title: "Nanotechnology Engineering @ UWaterloo",
   location: "Waterloo, ON",
   availability: "Open to co-op & internship opportunities",
-  bio: "First-year Nanotechnology Engineering student at the University of Waterloo and Paul B. Spafford Entrance Scholarship recipient. I like taking ideas all the way to something real, from parametric CAD concepts pitched to executives to Python and Java apps that turn data and live audio into useful feedback. Off the clock, I've spent 6+ years behind a drum kit.",
+  bio: "First-year Nanotechnology Engineering student at UWaterloo (Paul B. Spafford Scholar). I build things end-to-end, from parametric CAD concepts to Python and Java tools for real-time audio and data. Outside of engineering, I've played drums for 6+ years.",
 
   socials: [
     { kind: "github", label: "GitHub", href: "https://github.com/SptHensley" },
@@ -274,7 +274,7 @@ export const portfolio: PortfolioData = {
 
   contact: {
     email: "spthensley@uwaterloo.ca",
-    headline: "Open a work order",
+    headline: "Get in touch",
     blurb:
       "Looking for a co-op student, a teammate for a build, or just want to talk design, code or drums? Send a message and I'll get back to you.",
     formEndpoint: "",

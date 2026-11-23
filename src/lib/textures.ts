@@ -118,7 +118,7 @@ export function warningDecal(kind: "CAUTION" | "DANGER") {
     const lines =
       kind === "CAUTION"
         ? ["KEEP HANDS CLEAR OF", "MOVING MACHINERY"]
-        : ["DO NOT TOUCH THE MACHINE", "HIGH VOLTAGE // ROBOT ZONE"];
+        : ["DO NOT TOUCH THE MACHINE", "AUTHORIZED PERSONNEL ONLY"];
     ctx.font = `700 40px ${family}`;
     ctx.fillText(lines[0], w / 2, 168);
     ctx.font = `600 34px ${family}`;
@@ -219,7 +219,40 @@ export function crateFace() {
   });
 }
 
-/** Black stencil placard with yellow code, e.g. "01 // PROJECTS". */
+/** Long-grain wood for the crate edge battens (also used as a bump map). */
+export function woodGrain() {
+  return make("wood-grain", 256, 64, (ctx, w, h) => {
+    ctx.fillStyle = "#8F5329";
+    ctx.fillRect(0, 0, w, h);
+    // Deterministic pseudo-random streaks so every load looks the same.
+    let seed = 7;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 26; i++) {
+      const y = rand() * h;
+      ctx.strokeStyle = rand() > 0.5 ? "rgba(60,30,12,0.35)" : "rgba(255,205,150,0.12)";
+      ctx.lineWidth = 0.6 + rand() * 1.8;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= w; x += 32) ctx.lineTo(x, y + Math.sin(x * 0.03 + i) * (1 + rand() * 2));
+      ctx.stroke();
+    }
+    // A couple of knots.
+    for (const [x, y] of [
+      [70, 22],
+      [190, 44],
+    ]) {
+      const g = ctx.createRadialGradient(x, y, 1, x, y, 7);
+      g.addColorStop(0, "rgba(50,24,8,0.7)");
+      g.addColorStop(1, "rgba(50,24,8,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(x, y, 9, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+}
+
+/** Black stencil placard with yellow code, e.g. "01 PROJECTS". */
 export function cratePlacard(code: string, label: string) {
   return make(`placard-${code}-${label}`, 512, 192, (ctx, w, h) => {
     const family = displayFont();
@@ -237,7 +270,7 @@ export function cratePlacard(code: string, label: string) {
     ctx.fillText(code, 34, h / 2 + 4);
     const codeW = ctx.measureText(code).width;
     ctx.fillStyle = "#F4F4F5";
-    const text = `// ${label}`;
+    const text = label;
     fitText(ctx, text, w - codeW - 80, 64, "700", family);
     ctx.fillText(text, 34 + codeW + 18, h / 2 + 4);
   });
@@ -381,7 +414,7 @@ export function idPlate() {
     ctx.fillStyle = "#A1A1AA";
     ctx.font = `600 22px ${monoFont()}`;
     ctx.textBaseline = "middle";
-    ctx.fillText("RX-6 // 2026-023-465", 14, 30);
+    ctx.fillText("RX-6  SN 2026-023-465", 14, 30);
     ctx.fillText("PAYLOAD 12 KG  IP67", 14, 66);
   });
 }

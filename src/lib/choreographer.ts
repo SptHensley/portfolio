@@ -38,6 +38,11 @@ function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+/** "SKILLS & LAB" → "Skills & Lab" for screen-reader announcements. */
+function toTitle(label: string) {
+  return label.toLowerCase().replace(/w/g, (c) => c.toUpperCase());
+}
+
 function setPhase(phase: Phase, status: string, extra: Parameters<typeof ui.set>[0] = {}) {
   ui.set({ phase, status, ...extra });
 }
@@ -95,14 +100,14 @@ function buildOutbound(id: StationId) {
   const [sx, , sz] = slotPosition(id);
   const slot = worldToCyl(sx, SLOT_TIP_Y, sz);
   const drop = worldToCyl(CONVEYOR.dropX, BELT_TIP_Y, CONVEYOR.z);
-  const label = `${station.code} // ${station.label}`;
+  const label = toTitle(station.label);
 
   const tl = gsap.timeline({ paused: true });
   let pose: CylTarget = { ...IDLE_POSE };
 
   tl.call(() => {
     sim.arm.target = { ...IDLE_POSE };
-    setPhase("REACHING", `REACHING FOR CRATE ${label}`, { busy: true, activeStation: id, hovered: null });
+    setPhase("REACHING", `Opening ${label}: picking up the crate`, { busy: true, activeStation: id, hovered: null });
     factoryAudio.play("blip");
   });
   tl.to(sim.arm, { idleWeight: 0, duration: 0.45, ease: "sine.inOut" }, 0);
@@ -112,7 +117,7 @@ function buildOutbound(id: StationId) {
   pose = move(tl, pose, { ...pose, y: SLOT_TIP_Y }, 0.7, { ease: "power2.inOut" });
 
   tl.call(() => {
-    setPhase("GRIPPING", "VACUUM LOCK ENGAGED");
+    setPhase("GRIPPING", "Crate gripped");
     grip(id);
     factoryAudio.play("suction");
   });
@@ -120,7 +125,7 @@ function buildOutbound(id: StationId) {
   dwell(tl, 0.15);
 
   // Lift, swing along an arc to the conveyor, lower onto the belt.
-  tl.call(() => setPhase("PLACING", "TRANSFERRING TO CONVEYOR"));
+  tl.call(() => setPhase("PLACING", "Moving the crate to the conveyor"));
   pose = move(tl, pose, { ...pose, y: SAFE_TIP_Y }, 0.55, { ease: "power2.inOut" });
   pose = move(tl, pose, { yaw: drop.yaw, r: drop.r, y: SAFE_TIP_Y }, 1.15, { bump: 0.22 });
   pose = move(tl, pose, { ...pose, y: BELT_TIP_Y }, 0.6, { ease: "power2.inOut" });
@@ -146,7 +151,7 @@ function buildOutbound(id: StationId) {
     () => {
       s0 = sim.belt.s;
       sim.camera.stationX = station.x;
-      setPhase("CONVEYING_OUT", `CONVEYING TO STATION ${label}`);
+      setPhase("CONVEYING_OUT", `Conveying to ${label}`);
     },
     undefined,
     retreat + 0.1,
@@ -169,7 +174,7 @@ function buildOutbound(id: StationId) {
     timeline = null;
     physical = id;
     if (desired === id) {
-      setPhase("AT_SECTION", `STATION ${label} // ONLINE`, { busy: false, panelOpen: true });
+      setPhase("AT_SECTION", `${label} is open`, { busy: false, panelOpen: true });
       factoryAudio.play("arrive");
     } else {
       reconcile();
@@ -185,7 +190,7 @@ function buildInbound(id: StationId) {
   const [sx, , sz] = slotPosition(id);
   const slot = worldToCyl(sx, SLOT_TIP_Y, sz);
   const drop = worldToCyl(CONVEYOR.dropX, BELT_TIP_Y, CONVEYOR.z);
-  const label = `${station.code} // ${station.label}`;
+  const label = toTitle(station.label);
 
   const tl = gsap.timeline({ paused: true });
   const distance = sim.crates[id].pos.x - CONVEYOR.dropX;
@@ -196,7 +201,7 @@ function buildInbound(id: StationId) {
   tl.call(() => {
     s0 = sim.belt.s;
     sim.camera.stationX = station.x;
-    setPhase("REVERSING", "CONVEYOR REVERSED // RETURNING TO HUB", { busy: true, panelOpen: false });
+    setPhase("REVERSING", "Returning to the start", { busy: true, panelOpen: false });
     factoryAudio.play("blip");
   });
   tl.to(convey, {
@@ -216,18 +221,18 @@ function buildInbound(id: StationId) {
   tl.to(sim.arm, { idleWeight: 0, duration: 0.45, ease: "sine.inOut" }, preStart);
   pose = move(tl, pose, { yaw: drop.yaw, r: drop.r, y: SAFE_TIP_Y }, 1.1, { bump: 0.06, position: preStart });
 
-  tl.call(() => setPhase("REACHING", `RETRIEVING CRATE ${label}`), undefined, conveyTime);
+  tl.call(() => setPhase("REACHING", `Putting the ${label} crate back`), undefined, conveyTime);
   pose = move(tl, pose, { ...pose, y: BELT_TIP_Y }, 0.65, { ease: "power2.inOut", position: conveyTime + 0.05 });
 
   tl.call(() => {
-    setPhase("GRIPPING", "VACUUM LOCK ENGAGED");
+    setPhase("GRIPPING", "Crate gripped");
     grip(id);
     factoryAudio.play("suction");
   });
   tl.to(sim.arm, { suction: 1, duration: 0.25, ease: "power1.out" });
   dwell(tl, 0.15);
 
-  tl.call(() => setPhase("PLACING", "RESTOCKING STAGING PALLET"));
+  tl.call(() => setPhase("PLACING", "Placing the crate on the pallet"));
   pose = move(tl, pose, { ...pose, y: SAFE_TIP_Y }, 0.55, { ease: "power2.inOut" });
   pose = move(tl, pose, { yaw: slot.yaw, r: slot.r, y: SAFE_TIP_Y }, 1.15, { bump: 0.22 });
   pose = move(tl, pose, { ...pose, y: SLOT_TIP_Y }, 0.65, { ease: "power2.inOut" });
@@ -246,7 +251,7 @@ function buildInbound(id: StationId) {
   tl.eventCallback("onComplete", () => {
     timeline = null;
     physical = null;
-    setPhase("IDLE", "SYSTEM READY", { busy: false, activeStation: null });
+    setPhase("IDLE", "Ready", { busy: false, activeStation: null });
     reconcile();
   });
   return tl;
@@ -286,7 +291,7 @@ function teleport(id: StationId) {
   sim.camera.blend = 1;
   physical = id;
   desired = id;
-  setPhase("AT_SECTION", `STATION ${station.code} // ${station.label} // ONLINE`, {
+  setPhase("AT_SECTION", `${toTitle(station.label)} is open`, {
     activeStation: id,
     panelOpen: true,
     busy: false,

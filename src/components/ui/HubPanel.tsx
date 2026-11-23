@@ -1,10 +1,10 @@
 "use client";
 
 import { Check, MapPin } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { portfolio } from "@/data/portfolio";
 import { dispatchCrate } from "@/lib/choreographer";
-import { STATION_LIST } from "@/lib/layout";
+import { STATION_LIST, type StationId } from "@/lib/layout";
 import { sim } from "@/lib/sim";
 import { ui, useUI } from "@/lib/store";
 import { useCopyEmail } from "@/lib/useCopyEmail";
@@ -12,6 +12,14 @@ import { useLayoutMode } from "@/lib/useLayoutMode";
 import { SocialIcon } from "./icons";
 
 const email = portfolio.contact.email;
+
+/** Indicator colour for each mechanical dispatch key. */
+const SWITCH_LED: Record<StationId, string> = {
+  projects: "#FACC15",
+  experience: "#22D3EE",
+  skills: "#4ADE80",
+  contact: "#FB923C",
+};
 
 /**
  * Bio text in a height-capped scroll box. On tall screens it shows in full;
@@ -112,12 +120,12 @@ export function HubPanel() {
       } ${atHub ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"}`}
     >
       <div
-        className={`mb-2 flex shrink-0 items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-zinc-600 sm:text-[11px] ${
+        className={`mb-2 flex shrink-0 items-center gap-2 text-[13px] font-medium text-zinc-600 ${
           wide ? "" : "[@media(max-height:720px)]:hidden"
         }`}
       >
         <span className="inline-block size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-        {`OPERATOR PROFILE // ${portfolio.callsign} // ONLINE`}
+        {portfolio.availability}
       </div>
 
       <p
@@ -144,10 +152,7 @@ export function HubPanel() {
       </div>
 
       <div className={`hmi-frame pointer-events-auto mt-4 flex min-h-0 flex-col ${wide ? "p-5 [@media(max-height:760px)]:p-3" : "p-3"}`}>
-        <div className="mb-2 flex shrink-0 items-center justify-between gap-4 font-mono text-[10px] tracking-[0.2em] text-zinc-500">
-          <span className="shrink-0">BIO.TXT</span>
-          <span className="hidden truncate sm:inline">{portfolio.availability.toUpperCase()}</span>
-        </div>
+        <div className="mb-2 shrink-0 font-mono text-[10px] tracking-[0.2em] text-zinc-500">ABOUT</div>
         <ScrollableBio wide={wide} />
         <div className="mt-3 flex shrink-0 flex-wrap items-center gap-2">
           {portfolio.socials.map((s) => {
@@ -176,17 +181,17 @@ export function HubPanel() {
             );
           })}
         </div>
-        <p role="status" aria-live="polite" className={copied ? "mt-2 font-mono text-[10px] tracking-[0.14em] text-emerald-700" : "sr-only"}>
-          {copied ? `✓ ${email} COPIED TO CLIPBOARD` : ""}
+        <p role="status" aria-live="polite" className={copied ? "mt-2 text-xs font-medium text-emerald-700" : "sr-only"}>
+          {copied ? `✓ Copied ${email}` : ""}
         </p>
       </div>
 
       <div className="pointer-events-auto mt-4 shrink-0 [@media(max-height:500px)]:hidden">
-        <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-zinc-600">
-          <span>{wide ? "◄ CLICK A CRATE ON THE PALLET, OR DISPATCH:" : "TAP A CRATE OR DISPATCH:"}</span>
-          {busy && <span className="animate-blink text-charcoal">CELL BUSY</span>}
+        <div className="mb-2 flex items-center justify-between text-[13px] font-medium text-zinc-600">
+          <span>{wide ? "Click a crate, or pick a section:" : "Tap a crate, or pick a section:"}</span>
+          {busy && <span className="animate-blink font-mono text-[10px] tracking-[0.18em] text-charcoal">ARM MOVING</span>}
         </div>
-        <div className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 pb-1 min-[480px]:grid-cols-4">
           {STATION_LIST.map((s) => (
             <button
               key={s.id}
@@ -197,19 +202,17 @@ export function HubPanel() {
               onMouseLeave={() => ui.get().hovered === s.id && ui.set({ hovered: null })}
               onFocus={() => !busy && ui.set({ hovered: s.id })}
               onBlur={() => ui.get().hovered === s.id && ui.set({ hovered: null })}
-              aria-label={`Dispatch crate ${s.code}: ${s.label}`}
+              aria-label={`Open ${s.label} (key ${s.index + 1})`}
               aria-keyshortcuts={String(s.index + 1)}
-              className={`group flex items-center justify-between gap-1 border-2 border-charcoal px-2 py-1.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-signal ${
-                hovered === s.id ? "bg-safety" : "bg-white/75 hover:bg-safety"
-              }`}
+              data-lit={hovered === s.id}
+              style={{ "--led": SWITCH_LED[s.id] } as CSSProperties}
+              className="switch-key text-left"
             >
-              <span className="flex flex-col leading-none">
-                <span className="font-mono text-[10px] text-zinc-600">{`${s.code} //`}</span>
-                <span className="font-display text-sm font-bold tracking-wide">{s.label}</span>
+              <span className="flex items-center justify-between font-mono text-[10px] leading-none text-zinc-400">
+                <span>{s.code}</span>
+                <span aria-hidden="true" className="switch-led" />
               </span>
-              <span aria-hidden="true" className="font-mono text-xs transition-transform group-hover:translate-x-0.5">
-                ▸
-              </span>
+              <span className="font-display text-[15px] font-bold uppercase leading-none tracking-wide">{s.label}</span>
             </button>
           ))}
         </div>

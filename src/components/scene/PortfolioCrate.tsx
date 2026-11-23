@@ -4,15 +4,42 @@ import { Html } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { dispatchCrate } from "@/lib/choreographer";
 import { damp } from "@/lib/kinematics";
 import { CRATE_SIZE, STATIONS, type StationId } from "@/lib/layout";
 import { sim } from "@/lib/sim";
 import { ui, useUI } from "@/lib/store";
-import { crateFace, cratePlacard, crateTopStencil } from "@/lib/textures";
+import { crateFace, cratePlacard, crateTopStencil, woodGrain } from "@/lib/textures";
 
 const S = CRATE_SIZE;
 const HALF = S / 2;
+/** Edge batten thickness; matches the painted frame border on the face texture. */
+const T = 0.05;
+/** Panel box is inset so the rounded battens stand proud of the faces. */
+const PANEL = S - 0.02;
+const E = HALF - T / 2;
+
+type Batten = { axis: "x" | "y" | "z"; pos: [number, number, number] };
+/**
+ * 12 edge battens: full-height corner posts (Y) plus top/bottom rails along X
+ * and Z, shortened by 2T so no two boards overlap (no z-fighting at corners).
+ */
+const BATTENS: Batten[] = [
+  ...[-1, 1].flatMap((sx) => [-1, 1].map((sz) => ({ axis: "y" as const, pos: [sx * E, 0, sz * E] as [number, number, number] }))),
+  ...[-1, 1].flatMap((sy) => [-1, 1].map((sz) => ({ axis: "x" as const, pos: [0, sy * E, sz * E] as [number, number, number] }))),
+  ...[-1, 1].flatMap((sx) => [-1, 1].map((sy) => ({ axis: "z" as const, pos: [sx * E, sy * E, 0] as [number, number, number] }))),
+];
+
+let battenGeometry: Record<Batten["axis"], THREE.BufferGeometry> | null = null;
+function getBattenGeometry() {
+  battenGeometry ??= {
+    x: new RoundedBoxGeometry(S - 2 * T, T, T, 2, 0.012),
+    y: new RoundedBoxGeometry(T, S, T, 2, 0.012),
+    z: new RoundedBoxGeometry(T, T, S - 2 * T, 2, 0.012),
+  };
+  return battenGeometry;
+}
 
 /** Industrial targeting reticle: four corner brackets that snap in on hover. */
 function Reticle({ active }: { active: boolean }) {
@@ -67,6 +94,7 @@ export function PortfolioCrate({ id }: { id: StationId }) {
   const station = STATIONS[id];
   const group = useRef<THREE.Group>(null);
   const bodyMesh = useRef<THREE.Mesh>(null);
+  const battenMesh = useRef<THREE.Mesh>(null);
   const lift = useRef(0);
   const glow = useRef(0);
 
@@ -77,13 +105,31 @@ export function PortfolioCrate({ id }: { id: StationId }) {
     () =>
       new THREE.MeshStandardMaterial({
         map: crateFace(),
-        roughness: 0.82,
+        // The face artwork doubles as a bump map: plank gaps, brace edges and
+        // screw heads pick up real relief under the key light.
+        bumpMap: crateFace(),
+        bumpScale: 2.5,
+        roughness: 0.8,
         metalness: 0,
         emissive: new THREE.Color("#FACC15"),
         emissiveIntensity: 0,
       }),
     [],
   );
+  const battenMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: woodGrain(),
+        bumpMap: woodGrain(),
+        bumpScale: 1.5,
+        roughness: 0.74,
+        metalness: 0,
+        emissive: new THREE.Color("#FACC15"),
+        emissiveIntensity: 0,
+      }),
+    [],
+  );
+  const battenGeo = getBattenGeometry();
   const placardMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -123,6 +169,9 @@ export function PortfolioCrate({ id }: { id: StationId }) {
     group.current!.position.set(c.pos.x, c.pos.y + lift.current, c.pos.z);
     const body = bodyMesh.current;
     if (body) (body.material as THREE.MeshStandardMaterial).emissiveIntensity = glow.current;
+    // All 12 battens share one per-crate material.
+    const batten = battenMesh.current;
+    if (batten) (batten.material as THREE.MeshStandardMaterial).emissiveIntensity = glow.current * 0.8;
   });
 
   const onOver = (e: ThreeEvent<PointerEvent>) => {
@@ -145,31 +194,33 @@ export function PortfolioCrate({ id }: { id: StationId }) {
   const showTag = hovered && interactive;
 
   return (
-    <group ref={group}>
-      <mesh
-        ref={bodyMesh}
-        material={faceMaterial}
-        castShadow
-        receiveShadow
-        onPointerOver={onOver}
-        onPointerOut={onOut}
-        onClick={onClick}
-      >
-        <boxGeometry args={[S, S, S]} />
+    <group ref={group} onPointerOver={onOver} onPointerOut={onOut} onClick={onClick}>
+      <mesh ref={bodyMesh} material={faceMaterial} castShadow receiveShadow>
+        <boxGeometry args={[PANEL, PANEL, PANEL]} />
       </mesh>
-      <mesh position={[0, -0.01, HALF + 0.003]} material={placardMaterial}>
-        <planeGeometry args={[0.42, 0.1575]} />
+      {BATTENS.map((b, i) => (
+        <mesh
+          key={i}
+          ref={i === 0 ? battenMesh : undefined}
+          geometry={battenGeo[b.axis]}
+          material={battenMaterial}
+          position={b.pos}
+          castShadow
+          receiveShadow
+        />
+      ))}
+      <mesh position={[0, -0.01, PANEL / 2 + 0.003]} material={placardMaterial}>
+        <planeGeometry args={[0.38, 0.1425]} />
       </mesh>
-      <mesh position={[0, HALF + 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={stencilMaterial}>
+      <mesh position={[0, PANEL / 2 + 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} material={stencilMaterial}>
         <planeGeometry args={[0.3, 0.3]} />
       </mesh>
       <Reticle active={showTag} />
       {showTag && (
         <Html position={[0, HALF + 0.32, 0]} center zIndexRange={[30, 20]} style={{ pointerEvents: "none" }}>
           <div className="reticle-tag">
-            <span className="reticle-tag__lock">TARGET LOCK</span>
-            <span>{`${station.code} // ${station.label}`}</span>
-            <span className="reticle-tag__hint">CLICK TO DISPATCH ▸</span>
+            <span>{`${station.code}  ${station.label}`}</span>
+            <span className="reticle-tag__hint">CLICK TO OPEN</span>
           </div>
         </Html>
       )}

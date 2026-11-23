@@ -35,7 +35,7 @@ let state: UIState = {
   hovered: null,
   sound: false,
   ready: false,
-  status: "SYSTEM READY",
+  status: "Ready",
 };
 
 const listeners = new Set<Listener>();

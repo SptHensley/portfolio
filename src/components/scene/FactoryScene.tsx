@@ -34,6 +34,8 @@ function LightRig() {
     cam.updateProjectionMatrix();
     l.shadow.bias = -0.0004;
     l.shadow.normalBias = 0.02;
+    // Wider PCF filter kernel = soft, studio-style penumbrae.
+    l.shadow.radius = 5;
   }, []);
   useFrame(() => {
     const l = light.current!;
@@ -42,7 +44,13 @@ function LightRig() {
     l.target.position.set(fx, 0, 0);
     l.target.updateMatrixWorld();
   });
-  return <directionalLight ref={light} intensity={2.3} color="#ffffff" castShadow />;
+  return (
+    <>
+      <directionalLight ref={light} intensity={2.0} color="#fffaf0" castShadow />
+      {/* Cool, shadowless fill from the left to model the arm's form. */}
+      <directionalLight position={[-8, 5, 4]} intensity={0.45} color="#dbe7ff" />
+    </>
+  );
 }
 
 function ReadySignal() {
@@ -63,13 +71,22 @@ export function FactoryScene() {
 
       <color attach="background" args={[BACKDROP]} />
       <fog attach="fog" args={[BACKDROP, 20, 46]} />
-      <hemisphereLight args={["#ffffff", "#c7ccd4", 1.05]} />
+      <hemisphereLight args={["#ffffff", "#c7ccd4", 0.85]} />
       <LightRig />
-      <Environment resolution={256} frames={1} environmentIntensity={0.75}>
-        <Lightformer form="rect" intensity={2.4} position={[0, 6, 4]} rotation-x={Math.PI / 2.4} scale={[14, 4, 1]} />
-        <Lightformer form="rect" intensity={1.4} position={[-6, 3, 2]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
-        <Lightformer form="rect" intensity={1.2} position={[6, 2, -3]} rotation-y={-Math.PI / 2} scale={[8, 2, 1]} />
-        <Lightformer form="ring" intensity={0.8} position={[0, 4, -8]} scale={4} />
+      {/*
+        Procedural studio environment (no HDR download): a dim cyclorama with an
+        overhead softbox, two tall strip lights for crisp streak reflections on
+        the clear-coated links, a front fill and a warm rim from behind.
+        Lightformers aim at the origin by default.
+      */}
+      <Environment resolution={512} frames={1} environmentIntensity={1}>
+        <color attach="background" args={["#3b3e45"]} />
+        <Lightformer form="rect" intensity={3} position={[0, 8, 1]} scale={[10, 6, 1]} />
+        <Lightformer form="rect" intensity={5} position={[-5, 2.5, 4]} scale={[0.7, 7, 1]} />
+        <Lightformer form="rect" intensity={5} position={[5, 2.5, 4]} scale={[0.7, 7, 1]} />
+        <Lightformer form="rect" intensity={1.6} position={[0, 1.5, 9]} scale={[12, 3, 1]} />
+        <Lightformer form="rect" color="#ffe6bf" intensity={1.4} position={[0, 3, -8]} scale={[10, 2.5, 1]} />
+        <Lightformer form="circle" intensity={2} position={[-7, 6, -2]} scale={2.5} />
       </Environment>
 
       {/* Studio floor: grid lines + shadow catcher on the seamless backdrop */}
@@ -87,7 +104,7 @@ export function FactoryScene() {
       />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]} receiveShadow renderOrder={1}>
         <planeGeometry args={[220, 90]} />
-        <shadowMaterial transparent opacity={0.17} />
+        <shadowMaterial transparent opacity={0.2} />
       </mesh>
 
       <RobotArm />

@@ -11,17 +11,17 @@ export function BootScreen({ fading = false }: { fading?: boolean }) {
     >
       <div className="w-[min(320px,80vw)]">
         <div className="mb-3 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] text-zinc-500">
-          <span>FACTORY.OS</span>
+          <span>{portfolio.name.toUpperCase()}</span>
           <span>{portfolio.callsign}</span>
         </div>
         <div className="font-display text-3xl font-extrabold uppercase tracking-wide text-charcoal">
-          Initialising cell<span className="animate-blink">_</span>
+          Loading<span className="animate-blink">_</span>
         </div>
         <div className="relative mt-4 h-2 overflow-hidden border border-charcoal/30 bg-white/60">
           <div className="hazard-edge absolute inset-y-0 left-0 w-1/3 animate-[scan_1.4s_linear_infinite]" />
         </div>
         <div className="mt-3 font-mono text-[10px] tracking-[0.2em] text-zinc-500">
-          HOMING AXES J1–J6 · PRIMING VACUUM · CONVEYOR STANDBY
+          STARTING THE 3D SCENE
         </div>
       </div>
     </div>

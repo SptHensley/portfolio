@@ -14,7 +14,7 @@ type Status =
   | { kind: "error"; message: string };
 
 const SENT_MESSAGE: Record<"form" | "mail" | "mail-copied", string> = {
-  form: "✓ Work order queued. I'll be in touch.",
+  form: "✓ Message sent. I'll be in touch.",
   mail: `✓ Opening your mail app. If nothing opens, email ${portfolio.contact.email}.`,
   "mail-copied": `✓ Opening your mail app. If nothing opens, your message is copied: paste it into an email to ${portfolio.contact.email}.`,
 };
@@ -67,23 +67,23 @@ export function ContactStation() {
   return (
     <div className="grid grid-cols-1 gap-6 @2xl:grid-cols-[1.4fr_1fr]">
       <div className="animate-fade-up">
-        <SectionLabel>WORK ORDER // NEW</SectionLabel>
+        <SectionLabel>SEND A MESSAGE</SectionLabel>
         <h3 className="font-display text-3xl font-extrabold uppercase leading-none text-charcoal">{contact.headline}</h3>
         <p className="mt-2 text-sm leading-relaxed text-zinc-700">{contact.blurb}</p>
 
         <form onSubmit={onSubmit} className="mt-4 space-y-3" noValidate>
           <div className="grid grid-cols-1 gap-3 @md:grid-cols-2">
             <label className="block">
-              <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">OPERATOR NAME</span>
+              <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">NAME</span>
               <input name="name" autoComplete="name" required placeholder="Ada Lovelace" className={inputClass} />
             </label>
             <label className="block">
-              <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">RETURN CHANNEL (EMAIL)</span>
+              <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">EMAIL</span>
               <input name="email" type="email" autoComplete="email" required placeholder="ada@example.com" className={inputClass} />
             </label>
           </div>
           <label className="block">
-            <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">PAYLOAD (MESSAGE)</span>
+            <span className="mb-1 block font-mono text-[10px] tracking-[0.2em] text-zinc-500">MESSAGE</span>
             <textarea name="message" required rows={5} placeholder="Tell me about the role, project or idea…" className={`${inputClass} resize-y`} />
           </label>
           <div className="flex flex-wrap items-center gap-3">
@@ -93,7 +93,7 @@ export function ContactStation() {
               className="press-button inline-flex items-center gap-2 px-5 py-2.5 font-display text-lg font-extrabold tracking-[0.08em]"
             >
               <Send className="size-4" aria-hidden="true" />
-              {status.kind === "sending" ? "TRANSMITTING…" : "TRANSMIT ▸"}
+              {status.kind === "sending" ? "SENDING…" : "SEND"}
             </button>
             <p role="status" aria-live="polite" className="min-w-0 flex-1 text-sm leading-snug">
               {status.kind === "sent" && <span className="text-emerald-700">{SENT_MESSAGE[status.via]}</span>}
@@ -104,7 +104,7 @@ export function ContactStation() {
       </div>
 
       <aside className="animate-fade-up space-y-3" style={{ animationDelay: "160ms" }}>
-        <SectionLabel>DIRECT LINES</SectionLabel>
+        <SectionLabel>ELSEWHERE</SectionLabel>
         <a
           href={`mailto:${contact.email}`}
           onClick={() => void copy()}

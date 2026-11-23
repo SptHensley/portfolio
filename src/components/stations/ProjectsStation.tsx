@@ -7,7 +7,7 @@ export function ProjectsStation() {
   const { projects } = portfolio;
   return (
     <div>
-      <SectionLabel right={`${projects.length} ITEMS`}>MANIFEST // BUILD LOG</SectionLabel>
+      <SectionLabel>SELECTED WORK</SectionLabel>
       <ul className="grid grid-cols-1 gap-3 @xl:grid-cols-2">
         {projects.map((p, i) => (
           <li
@@ -16,9 +16,8 @@ export function ProjectsStation() {
             className="animate-fade-up group relative flex flex-col border border-charcoal/15 bg-white p-4 transition-shadow hover:shadow-[0_0_0_2px_#18181B]"
           >
             <div className="flex items-center justify-between gap-2 font-mono text-[10px] tracking-[0.18em] text-zinc-500">
-              <span>PRJ-{String(i + 1).padStart(2, "0")}</span>
+              <span>{p.year}</span>
               <span className="flex items-center gap-2">
-                {p.year && <span>{p.year}</span>}
                 {p.status && <span className="bg-charcoal px-1.5 py-0.5 font-bold text-safety">{p.status}</span>}
               </span>
             </div>

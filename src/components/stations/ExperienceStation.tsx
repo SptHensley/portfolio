@@ -6,7 +6,7 @@ export function ExperienceStation() {
   return (
     <div className="space-y-8">
       <div>
-        <SectionLabel right={`${experience.length} ENTRIES`}>SERVICE LOG // TIMELINE</SectionLabel>
+        <SectionLabel>WORK & LEADERSHIP</SectionLabel>
         <ol className="relative ml-2 border-l-2 border-charcoal/80">
           {experience.map((e, i) => {
             const current = e.end.toUpperCase() === "PRESENT";
@@ -50,7 +50,7 @@ export function ExperienceStation() {
 
       {education.length > 0 && (
         <div>
-          <SectionLabel right={`${education.length} ENTRIES`}>EDUCATION // CERTIFICATION</SectionLabel>
+          <SectionLabel>EDUCATION</SectionLabel>
           <ul className="grid grid-cols-1 gap-3 @xl:grid-cols-2">
             {education.map((ed, i) => (
               <li

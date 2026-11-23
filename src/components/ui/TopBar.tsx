@@ -30,26 +30,26 @@ function SoundToggle() {
   );
 }
 
+/** "SKILLS & LAB" → "Skills & Lab" */
+function toTitle(label: string) {
+  return label.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export function TopBar() {
   const active = useUI((s) => s.activeStation);
   const station = active ? STATIONS[active] : null;
   return (
     <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 px-3 py-3 sm:px-5">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex items-center border-2 border-charcoal bg-charcoal font-display text-sm font-extrabold tracking-wider">
-          <span className="px-2 py-0.5 text-safety">{portfolio.callsign}</span>
-          <span className="bg-safety px-2 py-0.5 text-charcoal">CELL</span>
+        <div className="border-2 border-charcoal bg-charcoal px-2 py-0.5 font-display text-sm font-extrabold tracking-wider text-safety">
+          {portfolio.callsign}
         </div>
-        <nav aria-label="Location" className="hidden min-w-0 truncate font-mono text-[11px] tracking-[0.18em] text-zinc-600 sm:block">
-          <span className="text-charcoal">FACTORY.OS</span>
-          <span className="mx-2 text-zinc-400">/</span>
-          <span className={station ? "" : "text-charcoal"}>HUB</span>
+        <nav aria-label="Location" className="hidden min-w-0 truncate text-[13px] font-medium text-zinc-600 sm:block">
+          <span className={station ? "" : "text-charcoal"}>Home</span>
           {station && (
             <>
               <span className="mx-2 text-zinc-400">/</span>
-              <span className="text-charcoal">
-                ST-{station.code} {station.label}
-              </span>
+              <span className="text-charcoal">{toTitle(station.label)}</span>
             </>
           )}
         </nav>

@@ -29,10 +29,10 @@ export const ReverseConveyorButton = forwardRef<HTMLButtonElement, { compact?: b
         </span>
         <span className="flex min-w-0 flex-col leading-none">
           <span className={`font-display font-extrabold tracking-[0.04em] ${compact ? "text-[15px]" : "text-lg sm:text-xl"}`}>
-            ◄ REVERSE CONVEYOR // RETURN TO HUB
+            ◄ REVERSE CONVEYOR · RETURN TO HUB
           </span>
           <span className="mt-1 font-mono text-[10px] tracking-[0.16em] text-charcoal/70">
-            PRESS OR HIT ESC · ARM WILL RESTOCK THE CRATE
+            OR PRESS ESC
           </span>
         </span>
         <span aria-hidden="true" className="hazard-edge ml-auto hidden h-8 w-6 shrink-0 border border-charcoal sm:block" />

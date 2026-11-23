@@ -50,17 +50,14 @@ export function StationOverlay() {
             <div className="min-w-0">
               <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-zinc-500">
                 <span className="inline-block size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                STATION {station.code} · CRATE DOCKED · SCAN COMPLETE
+                STATION {station.code}
               </div>
               <h2
                 id="station-title"
                 className="mt-1 font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-charcoal sm:text-5xl"
               >
-                <span className="text-zinc-400">{`${station.code} //`}</span> {station.label}
+                <span className="text-zinc-400">{station.code}</span> {station.label}
               </h2>
-            </div>
-            <div className="hidden shrink-0 border-2 border-charcoal bg-safety px-2 py-1 font-mono text-[10px] font-bold tracking-[0.18em] sm:block">
-              ST-{station.code}
             </div>
           </div>
           <div className="mt-3">

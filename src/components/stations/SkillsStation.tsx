@@ -20,12 +20,11 @@ function SegmentBar({ level }: { level: number }) {
 export function SkillsStation() {
   const { skillGroups, lab, labTitle } = portfolio;
   const rated = skillGroups.some((g) => g.skills.some((s) => typeof s.level === "number"));
-  const total = skillGroups.reduce((n, g) => n + g.skills.length, 0);
 
   return (
     <div className="space-y-6">
       <div>
-        <SectionLabel right={rated ? "LOAD %" : `${total} MODULES ONLINE`}>CAPABILITY MATRIX</SectionLabel>
+        <SectionLabel right={rated ? "PROFICIENCY" : undefined}>TECHNICAL SKILLS</SectionLabel>
         <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2">
           {skillGroups.map((g, gi) => (
             <section
@@ -70,7 +69,7 @@ export function SkillsStation() {
 
       {lab.length > 0 && (
         <div>
-          <SectionLabel right={`${lab.length} ENTRIES`}>{labTitle}</SectionLabel>
+          <SectionLabel>{labTitle}</SectionLabel>
           <div className="border border-charcoal/15 bg-white">
             <table className="w-full text-left text-sm">
               <thead>

@@ -17,7 +17,6 @@ export function TelemetryHUD() {
   const jointRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const convRef = useRef<HTMLSpanElement>(null);
   const vacRef = useRef<HTMLSpanElement>(null);
-  const tipRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     let raf = 0;
@@ -42,10 +41,6 @@ export function TelemetryHUD() {
         vacRef.current.textContent = `${kpa.toFixed(0).padStart(3, " ")} kPa`;
         vacRef.current.dataset.on = sim.arm.suction > 0.5 ? "true" : "false";
       }
-      if (tipRef.current) {
-        const t = sim.arm.tip;
-        tipRef.current.textContent = `${t.x.toFixed(2)} ${t.y.toFixed(2)} ${t.z.toFixed(2)}`;
-      }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
@@ -63,14 +58,14 @@ export function TelemetryHUD() {
         <span
           className={`inline-block size-2 rounded-full ${busy ? "animate-blink bg-amber-400" : phase === "AT_SECTION" ? "bg-cyan-400" : "bg-emerald-400"}`}
         />
-        <span className="font-bold text-safety">{phase}</span>
+        <span className="font-bold text-safety">{phase.replace("_", " ")}</span>
       </div>
-      <div className="hidden min-w-0 flex-1 items-center truncate px-3 text-zinc-400 lg:flex" role="status" aria-live="polite">
+      <p className="sr-only" role="status" aria-live="polite">
         {status}
-      </div>
-      <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden px-3 lg:flex-none">
+      </p>
+      <div className="flex min-w-0 flex-1 items-center gap-4 overflow-hidden px-3">
         {JOINTS.map((k, i) => (
-          <span key={k} className={`whitespace-nowrap ${i >= 3 ? "hidden md:inline" : ""}`}>
+          <span key={k} className={`whitespace-nowrap ${i >= 3 ? "hidden lg:inline" : ""}`}>
             <span className="text-zinc-500">{k.toUpperCase()}</span>{" "}
             <span ref={(el) => void (jointRefs.current[i] = el)} className="tabular-nums text-zinc-100">
               +000.0°
@@ -80,7 +75,7 @@ export function TelemetryHUD() {
       </div>
       <div className="flex shrink-0 items-center gap-3 border-l border-white/10 px-3">
         <span className="whitespace-nowrap">
-          <span className="text-zinc-500">CONV</span>{" "}
+          <span className="text-zinc-500">BELT</span>{" "}
           <span ref={convRef} className="tabular-nums text-zinc-100 data-[moving=true]:text-safety">
             +0.00 m/s
           </span>
@@ -89,12 +84,6 @@ export function TelemetryHUD() {
           <span className="text-zinc-500">VAC</span>{" "}
           <span ref={vacRef} className="tabular-nums text-zinc-100 data-[on=true]:text-signal">
             0 kPa
-          </span>
-        </span>
-        <span className="hidden whitespace-nowrap xl:inline">
-          <span className="text-zinc-500">TCP</span>{" "}
-          <span ref={tipRef} className="tabular-nums text-zinc-100">
-            0.00 0.00 0.00
           </span>
         </span>
       </div>
