@@ -39,13 +39,13 @@ function ScrollableBio({ wide }: { wide: boolean }) {
   }, [measure]);
 
   return (
-    <div className="relative">
+    <div className="relative flex min-h-0 flex-col">
       <div
         ref={box}
         onScroll={measure}
         tabIndex={0}
         aria-label="Bio"
-        className={`thin-scroll overflow-y-auto overscroll-contain pr-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal ${
+        className={`thin-scroll min-h-0 overflow-y-auto overscroll-contain pr-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal ${
           wide ? "max-h-[max(5.5rem,24vh)]" : "max-h-[5.4rem]"
         }`}
         style={more ? { maskImage: "linear-gradient(to bottom, #000 70%, transparent)" } : undefined}
@@ -105,12 +105,14 @@ export function HubPanel() {
       aria-label="Operator profile"
       aria-hidden={!atHub}
       inert={!atHub}
-      className={`absolute z-20 transition-all duration-500 ease-out ${
-        wide ? "right-[4vw] top-[max(4rem,13vh)] w-[min(41vw,600px)]" : "inset-x-3 top-14"
+      className={`absolute z-20 flex flex-col transition-all duration-500 ease-out ${
+        wide
+          ? "right-[4vw] top-[max(4rem,13vh)] max-h-[calc(100dvh_-_max(4rem,13vh)_-_3.25rem)] w-[min(41vw,600px)]"
+          : "inset-x-3 top-14 max-h-[calc(100dvh_-_7rem)]"
       } ${atHub ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"}`}
     >
       <div
-        className={`mb-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-zinc-600 sm:text-[11px] ${
+        className={`mb-2 flex shrink-0 items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-zinc-600 sm:text-[11px] ${
           wide ? "" : "[@media(max-height:720px)]:hidden"
         }`}
       >
@@ -120,14 +122,14 @@ export function HubPanel() {
 
       <p
         aria-hidden="true"
-        className={`font-display font-extrabold uppercase leading-[0.86] tracking-[-0.01em] text-charcoal ${
+        className={`shrink-0 font-display font-extrabold uppercase leading-[0.86] tracking-[-0.01em] text-charcoal ${
           wide ? "text-[clamp(2.2rem,min(6vw,10.5vh),6.4rem)]" : "text-[clamp(2.1rem,10.5vw,3.4rem)]"
         }`}
       >
         {portfolio.name}
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex shrink-0 flex-wrap items-center gap-2">
         <span
           className={`inline-flex items-center bg-charcoal px-3 py-1 font-display font-bold uppercase tracking-[0.14em] text-safety ${
             wide ? "text-[clamp(0.85rem,min(1.4vw,2.4vh),1.25rem)]" : "text-sm"
@@ -141,13 +143,13 @@ export function HubPanel() {
         </span>
       </div>
 
-      <div className={`hmi-frame pointer-events-auto mt-4 ${wide ? "p-5 [@media(max-height:760px)]:p-3" : "p-3"}`}>
-        <div className="mb-2 flex items-center justify-between gap-4 font-mono text-[10px] tracking-[0.2em] text-zinc-500">
+      <div className={`hmi-frame pointer-events-auto mt-4 flex min-h-0 flex-col ${wide ? "p-5 [@media(max-height:760px)]:p-3" : "p-3"}`}>
+        <div className="mb-2 flex shrink-0 items-center justify-between gap-4 font-mono text-[10px] tracking-[0.2em] text-zinc-500">
           <span className="shrink-0">BIO.TXT</span>
           <span className="hidden truncate sm:inline">{portfolio.availability.toUpperCase()}</span>
         </div>
         <ScrollableBio wide={wide} />
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex shrink-0 flex-wrap items-center gap-2">
           {portfolio.socials.map((s) => {
             const isEmail = s.kind === "email";
             const showCopied = isEmail && copied;
@@ -179,7 +181,7 @@ export function HubPanel() {
         </p>
       </div>
 
-      <div className="pointer-events-auto mt-4 [@media(max-height:500px)]:hidden">
+      <div className="pointer-events-auto mt-4 shrink-0 [@media(max-height:500px)]:hidden">
         <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-zinc-600">
           <span>{wide ? "◄ CLICK A CRATE ON THE PALLET, OR DISPATCH:" : "TAP A CRATE OR DISPATCH:"}</span>
           {busy && <span className="animate-blink text-charcoal">CELL BUSY</span>}
