@@ -77,6 +77,49 @@ body {
   );
 }
 
+/*
+ * Boot loading bar. Every layer animates only transform, so it stays smooth
+ * while the main thread is busy. The fill eases toward 95% while loading and
+ * BootScreen finishes it to 100% once the scene is ready.
+ */
+.boot-bar {
+  animation: boot-fill 9s cubic-bezier(0.15, 0.7, 0.25, 1) both;
+}
+.boot-bar__counter {
+  animation: boot-fill-counter 9s cubic-bezier(0.15, 0.7, 0.25, 1) both;
+}
+.boot-bar__stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--safety) 0 25%,
+    var(--charcoal) 25% 50%
+  );
+  /* A 28px square tile holds exactly two stripe periods, so it repeats seamlessly. */
+  background-size: 28px 28px;
+  animation: boot-stripes 0.9s linear infinite;
+}
+@keyframes boot-fill {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(-5%);
+  }
+}
+@keyframes boot-fill-counter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(5%);
+  }
+}
+@keyframes boot-stripes {
+  to {
+    transform: translateX(28px);
+  }
+}
+
 /* ── Tactile industrial push-button ───────────────────────────────────── */
 .press-button {
   position: relative;
